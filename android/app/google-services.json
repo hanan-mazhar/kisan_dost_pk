@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "109319033251",
+    "project_id": "kisan-dost-pk",
+    "storage_bucket": "kisan-dost-pk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:109319033251:android:8f4eec5c961262381e8a16",
+        "android_client_info": {
+          "package_name": "com.hanan.kisan_dost_pk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIzrlADd44oMYsDDzPuPcY3vNMlSl97F8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

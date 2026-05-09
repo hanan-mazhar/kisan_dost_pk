@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="38" fill="#1B5E2015"/>
+  <rect x="10" y="50" width="60" height="35" rx="6" fill="#E8F5E9"/>
+        <polyline points="15,75 25,60 35,65 45,50 55,55 65,42" stroke="#2E7D32" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="65" cy="42" r="4" fill="#F9A825"/>
+        <text x="40" y="40" text-anchor="middle" font-size="18">📊</text>
+</svg>

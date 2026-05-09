@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1B5E20"/>
+      <stop offset="100%" style="stop-color:#2E7D32"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="url(#bg)"/>
+  <!-- Wheat design -->
+  <line x1="100" y1="150" x2="100" y2="70" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="75" y1="150" x2="75" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="125" y1="150" x2="125" y2="85" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <!-- Center grains -->
+  <ellipse cx="100" cy="63" rx="8" ry="12" fill="#F9A825"/>
+  <ellipse cx="100" cy="75" rx="7" ry="10" fill="#FDD835"/>
+  <ellipse cx="90" cy="67" rx="6" ry="10" fill="#F9A825" transform="rotate(-20,90,67)"/>
+  <ellipse cx="110" cy="67" rx="6" ry="10" fill="#F9A825" transform="rotate(20,110,67)"/>
+  <!-- Left grains -->
+  <ellipse cx="75" cy="78" rx="6" ry="10" fill="#F9A825"/>
+  <ellipse cx="66" cy="82" rx="5" ry="9" fill="#FDD835" transform="rotate(-20,66,82)"/>
+  <ellipse cx="84" cy="82" rx="5" ry="9" fill="#FDD835" transform="rotate(15,84,82)"/>
+  <!-- Right grains -->
+  <ellipse cx="125" cy="78" rx="6" ry="10" fill="#F9A825"/>
+  <ellipse cx="116" cy="82" rx="5" ry="9" fill="#FDD835" transform="rotate(-15,116,82)"/>
+  <ellipse cx="134" cy="82" rx="5" ry="9" fill="#FDD835" transform="rotate(20,134,82)"/>
+  <!-- Leaves -->
+  <path d="M100 118 Q82 110 75 118 Q83 106 100 112Z" fill="#81C784"/>
+  <path d="M100 118 Q118 110 125 118 Q117 106 100 112Z" fill="#81C784"/>
+</svg>

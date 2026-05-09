@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="38" fill="#2E7D3215"/>
+  <rect x="15" y="35" width="50" height="35" rx="8" fill="#81C784"/>
+        <rect x="25" y="30" width="30" height="40" rx="6" fill="#A5D6A7"/>
+        <circle cx="40" cy="20" r="12" fill="#FFCC80"/>
+        <text x="40" y="75" text-anchor="middle" font-size="20">👨‍🌾</text>
+        <rect x="60" y="45" width="18" height="12" rx="3" fill="#4CAF50"/>
+        <text x="69" y="54" text-anchor="middle" font-size="7" fill="white" font-weight="bold">SELL</text>
+</svg>
