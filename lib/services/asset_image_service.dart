@@ -3,12 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Manages copying bundled asset product images to local device storage
-/// so they are available offline without internet.
 class AssetImageService {
   static const String _prefKey = 'asset_images_copied_v1';
 
-  // Map: category → list of asset paths inside assets/images/Products/
   static const Map<String, List<String>> categoryAssets = {
     'Wheat': [
       'assets/images/Products/Wheat1.jpeg',

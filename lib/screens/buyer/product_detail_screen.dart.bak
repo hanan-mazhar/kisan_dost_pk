@@ -7,7 +7,6 @@ import '../../providers/auth_provider.dart';
 import '../../services/order_service.dart';
 import '../../models/product_model.dart';
 import '../../models/order_model.dart';
-import '../../models/user_model.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/constants.dart';
 
@@ -24,10 +23,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final _orderService = OrderService();
 
   List<String> get _allImages => [
-        // Cloudinary URLs first
+        ...widget.product.imagePaths,
         ...widget.product.imageUrls,
-        // Fallback: old local paths
-        ...widget.product.imagePaths.where((p) => !p.startsWith('http')),
       ];
 
   void _showOrderSheet() {
@@ -62,26 +59,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               setState(() => _currentImage = i),
                           itemBuilder: (_, i) {
                             final path = images[i];
-                            final isUrl = path.startsWith('http');
-                            if (isUrl) {
-                              return Image.network(
-                                path,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                loadingBuilder: (_, child, progress) =>
-                                    progress == null ? child : _placeholder(p.category),
-                                errorBuilder: (_, __, ___) =>
-                                    _placeholder(p.category),
-                              );
+                            final isLocal = !path.startsWith('http');
+                            if (isLocal) {
+                              final f = File(path);
+                              if (f.existsSync()) {
+                                return Image.file(f,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity);
+                              }
                             }
-                            // Old local file fallback
-                            final f = File(path);
-                            if (f.existsSync()) {
-                              return Image.file(f,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity);
-                            }
-                            return _placeholder(p.category);
+                            return Image.network(
+                              path,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (_, __, ___) =>
+                                  _placeholder(p.category),
+                            );
                           },
                         ),
                         if (images.length > 1)
@@ -361,9 +354,6 @@ class _OrderSheetState extends State<_OrderSheet> {
   File? _paymentScreenshot;
   final _orderService = OrderService();
 
-  /// Farmer ka payment info — loaded when order is placed.
-  FarmerPaymentInfo _farmerPaymentInfo = const FarmerPaymentInfo.empty();
-
   double get _total => widget.product.pricePerUnit * _quantity;
 
   @override
@@ -406,11 +396,6 @@ class _OrderSheetState extends State<_OrderSheet> {
         updatedAt: DateTime.now(),
       );
       _orderId = await _orderService.placeOrder(order);
-
-      // Fetch farmer's payment info to show in payment step
-      final farmerDoc = await _orderService.getFarmerPaymentInfo(p.farmerId);
-      _farmerPaymentInfo = farmerDoc;
-
       setState(() {
         _isLoading = false;
         _step = 1;
@@ -435,7 +420,7 @@ class _OrderSheetState extends State<_OrderSheet> {
       // Save screenshot locally
       final url = await _orderService.savePaymentProofLocally(
           _orderId!, _paymentScreenshot!);
-      await _orderService.updatePayment(_orderId!, 'Paid', url, farmerId: widget.product.farmerId, productName: widget.product.name);
+      await _orderService.updatePayment(_orderId!, 'Paid', url);
       setState(() => _isLoading = false);
       if (!mounted) return;
       Navigator.pop(context);
@@ -647,28 +632,6 @@ class _OrderSheetState extends State<_OrderSheet> {
       ]);
     }
 
-    // Determine which wallet info to show based on selected payment method
-    final isJazzCash = _paymentMethod == AppConstants.paymentJazzCash;
-    final isEasypaisa = _paymentMethod == AppConstants.paymentEasypaisa;
-
-    WalletInfo? walletInfo;
-    Color methodColor = AppTheme.primaryGreen;
-    String methodEmoji = '💳';
-
-    if (isJazzCash) {
-      walletInfo = _farmerPaymentInfo.jazzCash.isValid
-          ? _farmerPaymentInfo.jazzCash
-          : null;
-      methodColor = const Color(0xFFD32F2F);
-      methodEmoji = '💳';
-    } else if (isEasypaisa) {
-      walletInfo = _farmerPaymentInfo.easypaisa.isValid
-          ? _farmerPaymentInfo.easypaisa
-          : null;
-      methodColor = const Color(0xFF388E3C);
-      methodEmoji = '📱';
-    }
-
     // Easypaisa / JazzCash / Escrow
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -688,51 +651,27 @@ class _OrderSheetState extends State<_OrderSheet> {
               style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 16),
 
-          // Step 1 — payment details
+          // Step 1
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: methodColor.withOpacity(0.05),
+              color: AppTheme.primaryGreen.withOpacity(0.06),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: methodColor.withOpacity(0.25)),
+              border: Border.all(
+                  color: AppTheme.primaryGreen.withOpacity(0.25)),
             ),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [
-                    Text(methodEmoji,
-                        style: const TextStyle(fontSize: 18)),
-                    const SizedBox(width: 8),
-                    Text('Step 1: Send Payment',
-                        style: Theme.of(context).textTheme.titleMedium),
-                  ]),
-                  const SizedBox(height: 12),
-
-                  // Farmer Name (from profile)
-                  _payRow('Farmer Name:', widget.product.farmerName),
-
-                  // Account Name & Account Number — from paymentInfo
-                  if (walletInfo != null) ...[
-                    _payRow('Account Name:', walletInfo.accountName),
-                    _payRow('Account Number:', walletInfo.accountNumber),
-                  ] else ...[
-                    // Fallback: show phone number if payment info not set
-                    _payRow('Send To (Number):',
-                        widget.product.farmerPhone),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(
-                        '⚠️ Farmer ne $_paymentMethod details set nahi ki. Number par manually bhejein.',
-                        style: const TextStyle(
-                            fontSize: 12, color: AppTheme.amber),
-                      ),
-                    ),
-                  ],
-
-                  const Divider(height: 16),
+                  Text('Step 1: Send Payment',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
                   _payRow('Payment Method:', _paymentMethod),
+                  _payRow('Send To (Farmer\'s Number):',
+                      widget.product.farmerPhone),
                   _payRow('Amount:',
                       'PKR ${_total.toStringAsFixed(0)}'),
+                  _payRow('Farmer Name:', widget.product.farmerName),
                 ]),
           ),
           const SizedBox(height: 14),

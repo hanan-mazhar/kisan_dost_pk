@@ -24,7 +24,6 @@ class _MandiRatesScreenState extends State<MandiRatesScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Auto-seed sample data on first launch if Firestore is empty
     _mandiSvc.seedSampleData();
   }
 

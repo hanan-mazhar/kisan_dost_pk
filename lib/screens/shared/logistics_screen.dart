@@ -34,7 +34,8 @@ class _LogisticsScreenState extends State<LogisticsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().currentUser!;
+    final user = context.watch<AuthProvider>().currentUser;
+    if (user == null) return const Scaffold(body: SizedBox.shrink());
     final isTransporter = user.role == AppConstants.roleTransporter;
 
     return Scaffold(

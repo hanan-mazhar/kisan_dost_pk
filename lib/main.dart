@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'theme/app_theme.dart';
 import 'utils/constants.dart';
@@ -23,6 +22,7 @@ import 'screens/shared/profile_screen.dart';
 import 'screens/admin/admin_home_screen.dart';
 import 'models/product_model.dart';
 import 'services/asset_image_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +38,12 @@ void main() async {
   ));
 
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    // options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Asset product images ko local storage mein copy karo (sirf pehli baar)
+  // Initialize local notification banners
+  await NotificationService().init();
+
   await AssetImageService.copyAssetsToLocal();
 
   runApp(const KisanDostApp());

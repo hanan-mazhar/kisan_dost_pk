@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-// ─── Custom Text Field ───────────────────────────────────────────────────────
+
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -53,7 +53,7 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
-// ─── Loading Button (animated) ───────────────────────────────────────────────
+
 class LoadingButton extends StatefulWidget {
   final String label;
   final bool isLoading;
@@ -157,7 +157,7 @@ class _LoadingButtonState extends State<LoadingButton>
   }
 }
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
+
 class StatusBadge extends StatelessWidget {
   final String status;
   const StatusBadge({super.key, required this.status});
@@ -183,7 +183,7 @@ class StatusBadge extends StatelessWidget {
   }
 }
 
-// ─── Section Header ──────────────────────────────────────────────────────────
+
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;
@@ -204,7 +204,7 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-// ─── Star Rating ─────────────────────────────────────────────────────────────
+
 class StarRating extends StatelessWidget {
   final double rating;
   final double size;
@@ -223,7 +223,7 @@ class StarRating extends StatelessWidget {
   }
 }
 
-// ─── Empty State ─────────────────────────────────────────────────────────────
+
 class EmptyState extends StatelessWidget {
   final String emoji;
   final String title;
@@ -253,7 +253,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-// ─── Info Row ────────────────────────────────────────────────────────────────
+
 class InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -329,7 +329,7 @@ class _FadeInWidgetState extends State<FadeInWidget>
   }
 }
 
-// ─── Animated Count Card ─────────────────────────────────────────────────────
+
 class AnimatedStatCard extends StatefulWidget {
   final String emoji;
   final String label;

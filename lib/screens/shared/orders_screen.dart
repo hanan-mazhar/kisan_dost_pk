@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:kisan_dost_pk/widgets/custom_text_field.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +37,8 @@ class _OrdersScreenState extends State<OrdersScreen>
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().currentUser!;
+    final user = context.watch<AuthProvider>().currentUser;
+    if (user == null) return const Scaffold(body: SizedBox.shrink());
 
     return Scaffold(
       appBar: AppBar(
@@ -307,7 +307,7 @@ class _OrderCard extends StatelessWidget {
           label: 'Verify Payment',
           color: AppTheme.amber,
           onTap: () async {
-            await orderService.verifyPayment(order.id);
+            await orderService.verifyPayment(order.id, buyerId: order.buyerId, productName: order.productName);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -332,7 +332,7 @@ class _OrderCard extends StatelessWidget {
   }
 
   Future<void> _updateStatus(BuildContext context, String status) async {
-    await orderService.updateOrderStatus(order.id, status);
+    await orderService.updateOrderStatus(order.id, status, buyerId: order.buyerId, productName: order.productName);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Order $status'),
@@ -344,13 +344,29 @@ class _OrderCard extends StatelessWidget {
 
   void _viewProof(BuildContext context) {
     final path = order.paymentProofPath!;
-    final file = File(path);
-    if (!file.existsSync()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Screenshot not found on this device')),
+    final isUrl = path.startsWith('http');
+
+    // Purana local path — doosre device pe nahi milega
+    if (!isUrl) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Payment Proof'),
+          content: const Text(
+            'Yeh screenshot purane format mein save tha aur sirf us device pe tha jis se upload hua tha. Naye orders mein screenshot har device pe nazar aayega.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Theek Hai'),
+            ),
+          ],
+        ),
       );
       return;
     }
+
+    // Cloudinary URL — har device pe dikhega
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -365,7 +381,21 @@ class _OrderCard extends StatelessWidget {
               ),
             ],
           ),
-          Image.file(file, fit: BoxFit.contain),
+          Image.network(
+            path,
+            fit: BoxFit.contain,
+            loadingBuilder: (_, child, progress) {
+              if (progress == null) return child;
+              return const Padding(
+                padding: EdgeInsets.all(40),
+                child: CircularProgressIndicator(),
+              );
+            },
+            errorBuilder: (_, __, ___) => const Padding(
+              padding: EdgeInsets.all(24),
+              child: Text('Screenshot load nahi ho saki'),
+            ),
+          ),
         ]),
       ),
     );
@@ -417,13 +447,15 @@ class _OrderCard extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 final user =
-                    context.read<AuthProvider>().currentUser!;
+                    context.read<AuthProvider>().currentUser;
+                if (user == null) return;
+                final u = user;
                 await orderService.submitRating(RatingModel(
                   id: '',
                   orderId: order.id,
                   farmerId: order.farmerId,
-                  buyerId: user.id,
-                  buyerName: user.fullName,
+                  buyerId: u.id,
+                  buyerName: u.fullName,
                   rating: rating,
                   review: reviewCtrl.text.trim(),
                   createdAt: DateTime.now(),

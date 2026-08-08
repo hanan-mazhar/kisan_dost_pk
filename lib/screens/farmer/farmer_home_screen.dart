@@ -415,6 +415,7 @@ class _ProductCard extends StatelessWidget {
       decoration: AppTheme.cardDecoration,
       child: ListTile(
         contentPadding: const EdgeInsets.all(10),
+        isThreeLine: true,
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: _productImage(),
@@ -435,6 +436,8 @@ class _ProductCard extends StatelessWidget {
               ),
               Text(
                 '${product.quantityAvailable} ${product.unit} available • ${product.location}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -473,16 +476,20 @@ class _ProductCard extends StatelessWidget {
   }
 
   Widget _productImage() {
+    // Cloudinary URL first
+    if (product.imageUrls.isNotEmpty) {
+      return Image.network(product.imageUrls.first,
+          width: 56, height: 56, fit: BoxFit.cover,
+          loadingBuilder: (_, child, progress) =>
+              progress == null ? child : _icon(),
+          errorBuilder: (_, __, ___) => _icon());
+    }
+    // Fallback: old local file
     if (product.imagePaths.isNotEmpty) {
       final f = File(product.imagePaths.first);
       if (f.existsSync()) {
         return Image.file(f, width: 56, height: 56, fit: BoxFit.cover);
       }
-    }
-    if (product.imageUrls.isNotEmpty) {
-      return Image.network(product.imageUrls.first,
-          width: 56, height: 56, fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _icon());
     }
     return _icon();
   }

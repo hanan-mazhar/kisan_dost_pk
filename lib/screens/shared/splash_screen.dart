@@ -192,13 +192,13 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
 
-            // Main content
+            
             SafeArea(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo glass bubble
+                    
                     ScaleTransition(
                       scale: _logoBounce,
                       child: FadeTransition(

@@ -34,6 +34,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   List<String> _existingImagePaths = []; // when editing
 
   bool _isLoading = false;
+  int _uploadCurrent = 0;
+  int _uploadTotal = 0;
   final _productService = ProductService();
 
   bool get _isEditing => widget.editProduct != null;
@@ -51,7 +53,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _selectedLocation = p.location;
       _selectedCategory = p.category;
       _selectedUnit = p.unit;
-      _existingImagePaths = List.from(p.imagePaths);
+      // Load from imageUrls (Cloudinary) first, fallback to imagePaths (old local)
+      _existingImagePaths = p.imageUrls.isNotEmpty
+          ? List.from(p.imageUrls)
+          : List.from(p.imagePaths);
     }
   }
 
@@ -120,6 +125,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
     setState(() => _isLoading = true);
     try {
       final imagesToSave = _allNewImages.isNotEmpty ? _allNewImages : null;
+
+      void onProgress(int cur, int total) {
+        setState(() { _uploadCurrent = cur; _uploadTotal = total; });
+      }
+
       if (_isEditing) {
         final updated = widget.editProduct!.copyWith(
           name: _nameCtrl.text.trim(),
@@ -129,8 +139,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
           quantityAvailable: int.parse(_quantityCtrl.text),
           description: _descCtrl.text.trim(),
           location: location,
+          // IMPORTANT: pass the user's edited image list (after any removals)
+          // so deleted images don't get resurrected and updates actually replace.
+          imageUrls: _existingImagePaths,
         );
-        await _productService.updateProduct(updated, newImages: imagesToSave);
+        await _productService.updateProduct(updated,
+            newImages: imagesToSave, onProgress: onProgress);
       } else {
         final product = ProductModel(
           id: '',
@@ -150,7 +164,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        await _productService.addProduct(product, localImages: imagesToSave);
+        await _productService.addProduct(product, localImages: imagesToSave, onProgress: onProgress);
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -423,18 +437,39 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Widget _buildThumbWidget(_ImgSrc src) {
-    File f;
-    if (src.path != null) {
-      f = File(src.path!);
-      if (!f.existsSync()) {
-        return Container(
+    // Network image (Cloudinary URL)
+    if (src.path != null && src.path!.startsWith('http')) {
+      return Image.network(
+        src.path!,
+        fit: BoxFit.cover,
+        width: 90,
+        height: 90,
+        loadingBuilder: (_, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            color: Color(AppConstants.getCropColor(_selectedCategory)).withOpacity(0.1),
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        },
+        errorBuilder: (_, __, ___) => Container(
           color: Color(AppConstants.getCropColor(_selectedCategory)).withOpacity(0.1),
           child: Center(child: Text(AppConstants.getCropEmoji(_selectedCategory),
               style: const TextStyle(fontSize: 32))),
-        );
-      }
-    } else {
-      f = src.file!;
+        ),
+      );
+    }
+    // Local file
+    if (src.file != null) {
+      return Image.file(src.file!, fit: BoxFit.cover, width: 90, height: 90);
+    }
+    // Existing local path
+    final f = File(src.path!);
+    if (!f.existsSync()) {
+      return Container(
+        color: Color(AppConstants.getCropColor(_selectedCategory)).withOpacity(0.1),
+        child: Center(child: Text(AppConstants.getCropEmoji(_selectedCategory),
+            style: const TextStyle(fontSize: 32))),
+      );
     }
     return Image.file(f, fit: BoxFit.cover, width: 90, height: 90);
   }

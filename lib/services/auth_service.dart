@@ -11,7 +11,7 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // ── SIGN UP ──────────────────────────────────────────────────────────────
+
   Future<UserModel> signUp({
     required String email,
     required String password,
@@ -21,7 +21,6 @@ class AuthService {
     required String city,
     String? walletNumber,
   }) async {
-    // Step 1: Create Firebase Auth user
     final cred = await _auth.createUserWithEmailAndPassword(
       email: email.trim(),
       password: password,
@@ -54,17 +53,14 @@ class AuthService {
           .doc(uid)
           .set(user.toMap());
     } catch (firestoreError) {
-      // If Firestore fails, still allow login — data saved locally
-      // Firestore will sync when connection restores
+      
     }
 
-    // Step 5: Save role locally
     await _savePrefs(uid, role);
 
     return user;
   }
 
-  // ── LOGIN ─────────────────────────────────────────────────────────────────
   Future<UserModel> login({
     required String email,
     required String password,
@@ -76,7 +72,6 @@ class AuthService {
 
     final uid = cred.user!.uid;
 
-    // Try Firestore first, fall back to local cache
     UserModel? user;
     try {
       final doc = await _db
@@ -88,7 +83,6 @@ class AuthService {
         user = UserModel.fromMap(doc.data()!, doc.id);
       }
     } catch (_) {
-      // Firestore unavailable — try cache
       try {
         final doc = await _db
             .collection(AppConstants.usersCol)
@@ -100,7 +94,6 @@ class AuthService {
       } catch (_) {}
     }
 
-    // If still no user data, build from Firebase Auth
     if (user == null) {
       final prefs = await SharedPreferences.getInstance();
       final savedRole = prefs.getString(AppConstants.prefUserRole) ?? AppConstants.roleFarmer;
@@ -119,7 +112,6 @@ class AuthService {
     return user;
   }
 
-  // ── GET CURRENT USER ─────────────────────────────────────────────────────
   Future<UserModel?> getCurrentUser() async {
     final u = _auth.currentUser;
     if (u == null) return null;
@@ -159,7 +151,6 @@ class AuthService {
     );
   }
 
-  // ── UPDATE USER ───────────────────────────────────────────────────────────
   Future<void> updateUser(UserModel user) async {
     await _db
         .collection(AppConstants.usersCol)
@@ -167,19 +158,16 @@ class AuthService {
         .set(user.toMap(), SetOptions(merge: true));
   }
 
-  // ── SIGN OUT ──────────────────────────────────────────────────────────────
   Future<void> signOut() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await _auth.signOut();
   }
 
-  // ── FORGOT PASSWORD ───────────────────────────────────────────────────────
   Future<void> resetPassword(String email) async {
     await _auth.sendPasswordResetEmail(email: email.trim());
   }
 
-  // ── HELPERS ───────────────────────────────────────────────────────────────
   Future<void> _savePrefs(String uid, String role) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(AppConstants.prefUserId, uid);

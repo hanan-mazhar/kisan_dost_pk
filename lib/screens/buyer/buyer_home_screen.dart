@@ -536,13 +536,21 @@ class _ProductGridCardState extends State<_ProductGridCard>
   }
 
   Widget _productImage(ProductModel product) {
+    // Cloudinary URL first
+    if (product.imageUrls.isNotEmpty) {
+      return Image.network(
+        product.imageUrls.first,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        loadingBuilder: (_, child, progress) =>
+            progress == null ? child : _placeholder(product.category),
+        errorBuilder: (_, __, ___) => _placeholder(product.category),
+      );
+    }
+    // Fallback: old local file
     if (product.imagePaths.isNotEmpty) {
       final f = File(product.imagePaths.first);
       if (f.existsSync()) return Image.file(f, width: double.infinity, fit: BoxFit.cover);
-    }
-    if (product.imageUrls.isNotEmpty) {
-      return Image.network(product.imageUrls.first, width: double.infinity, fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _placeholder(product.category));
     }
     return _placeholder(product.category);
   }

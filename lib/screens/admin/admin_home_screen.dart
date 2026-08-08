@@ -9,9 +9,7 @@ import '../../models/other_models.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/constants.dart';
 
-// ════════════════════════════════════════════════════════════════════════════
-// ADMIN HOME SCREEN — 5 tabs: Overview | Users | Products | Orders | Mandi
-// ════════════════════════════════════════════════════════════════════════════
+
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});

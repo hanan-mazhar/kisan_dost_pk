@@ -26,7 +26,6 @@ class TransportService {
   }
 
   // Get available routes for farmers
-  // NOTE: No orderBy to avoid composite index requirement. Sort client-side.
   Future<List<TransportRoute>> getAvailableRoutes({
     String? fromCity,
     String? toCity,
@@ -52,6 +51,8 @@ class TransportService {
       routes.sort((a, b) => a.departureDate.compareTo(b.departureDate));
       return routes;
     } catch (e) {
+      // ignore: avoid_print
+      print('getAvailableRoutes error: $e');
       return [];
     }
   }
