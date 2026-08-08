@@ -30,7 +30,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String _selectedLocation = '';
 
   List<File> _pickedImages = [];         // camera / gallery
-  List<File> _selectedAssetImages = [];  // chosen from bundled library
+  final List<File> _selectedAssetImages = [];  // chosen from bundled library
   List<String> _existingImagePaths = []; // when editing
 
   bool _isLoading = false;
